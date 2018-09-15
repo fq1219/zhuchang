@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>后台登录</title>
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../../../static/web/xadmin/css/font.css" th:href="@{/web/xadmin/css/font.css}">
+	<link rel="stylesheet" href="../../../static/web/xadmin/css/xadmin.css" th:href="@{/web/xadmin/css/xadmin.css}">
+    <script type="text/javascript" src="../../../static/web/jquery-3.3.1/jquery-3.3.1.min.js" th:href="@{/web/jquery-3.3.1/jquery-3.3.1.min.js}"></script>
+    <script type="text/javascript" src="../../../static/web/layui/layui.js" th:href="@{/web/layui/layui.js}"></script>
+    <script type="text/javascript" src="../../../static/web/xadmin/js/xadmin.js" th:href="@{/web/xadmin/js/xadmin.js}"></script>
+
+    <style type="text/css">
+        .login-div{
+            position: relative;
+        }
+        .login-label{
+            padding-left: 10px;
+            width: 30px;
+            line-height: 30px;
+            font-size: 30px;
+            color: #009688;
+            position: absolute;
+            top: 1px;
+            left: 1px;
+        }
+        .login-input{
+            padding-left: 60px!important;
+        }
+
+    </style>
+</head>
+<body class="login-bg">
+    
+    <div class="login layui-anim layui-anim-up">
+        <div class="message">主场篮球管理登录</div>
+        <div id="darkbannerwrap"></div>
+
+            <div class="layui-form">
+                <div class="layui-form-item login-div">
+                    <label class="layui-form-label layui-icon layui-icon-username login-label" for="username"></label>
+                    <input type="text" name="username" id="username" lay-verify="required" placeholder="用户名" class="layui-input login-input">
+                </div>
+                <div class="layui-form-item login-div">
+                    <label class="layui-form-label layui-icon layui-icon-password login-label" for="password" ></label>
+                    <input type="password" name="password" id="password" lay-verify="required" placeholder="密码" class="layui-input login-input">
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-row">
+                        <div class="layui-col-xs7 login-div">
+                            <label class="layui-form-label layui-icon layui-icon-vercode login-label" for="captcha"></label>
+                            <input type="text" name="captcha" id="captcha" lay-verify="required" placeholder="图形验证码" class="layui-input login-input">
+                        </div>
+                        <div class="layui-col-xs5">
+                            <div style="margin-left: 10px;">
+                                <img src="https://www.oschina.net/action/user/captcha" id="vercode">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item" style="margin-bottom: 20px;">
+                    <a href="forget.html" class="layadmin-user-jump-change layadmin-link" style="margin-top: 7px;">忘记密码？</a>
+                </div>
+                <div class="layui-form-item">
+                    <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="login">登 入</button>
+                </div>
+            </div>
+    </div>
+
+    <script>
+
+
+        $(function() {
+
+            layui.use(['form','layer'], function(){
+              var form = layui.form;
+              var layer = layui.layer;
+
+              // layer.msg('玩命卖萌中', function(){
+              //   //关闭后的操作
+              //   });
+              //监听提交s
+
+
+                $('#vercode').click(function() {
+                    $(this).attr('src','https://www.oschina.net/action/user/captcha?' + Math.floor(Math.random() * 100));
+                });
+
+              form.on('submit(login)', function(data){
+                // alert(888)
+                layer.msg(JSON.stringify(data.field),function(){
+                    location.href='index.html'
+                });
+                return false;
+              });
+            });
+
+
+
+        });
+
+
+        
+    </script>
+
+    
+    <!-- 底部结束 -->
+
+</body>
+</html>

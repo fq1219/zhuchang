@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhuchang.mapper.MenuDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zhuchang.entity.Menu">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="p_id" property="pId" />
+        <result column="url" property="url" />
+        <result column="order_num" property="orderNum" />
+        <result column="icon" property="icon" />
+        <result column="create_by" property="createBy" />
+        <result column="create_date" property="createDate" />
+        <result column="update_by" property="updateBy" />
+        <result column="update_date" property="updateDate" />
+        <result column="permission" property="permission" />
+        <result column="menu_type" property="menuType" />
+        <result column="user_type" property="userType" />
+    </resultMap>
+    
+    <resultMap id="rootMap" type="com.zhuchang.entity.Menu" extends="BaseResultMap">
+        <result column="child_count" property="childCount"/>
+    </resultMap>
+
+    <select id="selectRootMenu" resultMap="rootMap">
+        select
+            (select count(t2.id) from sys_menu t2 where t2.p_id = t1.id) as child_count,
+            t1.*
+        from sys_menu t1
+        where t1.p_id  is null OR t1.p_id  = ''
+        order by t1.order_num
+    </select>
+    <select id="selectMenu" resultMap="rootMap">
+        select
+            (select count(t2.id) from sys_menu t2 where t2.p_id = t1.id) as child_count,
+            t1.*
+        from sys_menu t1
+        where t1.id  = #{id}
+        order by t1.order_num
+    </select>
+    <select id="selectChildRoot" parameterType="string" resultMap="rootMap">
+        select
+            (select count(t2.id) from sys_menu t2 where t2.p_id = t1.id) as child_count,
+            t1.*
+        from sys_menu t1
+        WHERE t1.p_id = #{pid}
+        order by t1.order_num
+    </select>
+
+</mapper>

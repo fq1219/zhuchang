@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhuchang.mapper.RoleDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zhuchang.entity.Role">
+        <id column="id" property="id" />
+        <result column="role_name" property="roleName" />
+        <result column="remark" property="remark" />
+        <result column="create_by" property="createBy" />
+        <result column="create_date" property="createDate" />
+        <result column="update_by" property="updateBy" />
+        <result column="update_date" property="updateDate" />
+    </resultMap>
+
+    <select id="selectRoleByPage" resultMap="BaseResultMap">
+        SELECT *
+        FROM sys_role
+        <where>
+            <if test="role!=null">
+                <if test="role.roleName != null and role.roleName !=''">
+                    or role_name like  CONCAT("%", #{role.roleName}, "%")
+                </if>
+                <if test="role.remark != null and role.remark !=''">
+                    or remark like  CONCAT("%", #{role.remark}, "%")
+                </if>
+            </if>
+        </where>
+        order by role_name
+    </select>
+
+</mapper>

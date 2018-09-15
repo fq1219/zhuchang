@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>更新角色</title>
+    <link rel="stylesheet" href="../../../static/web/layui/css/layui.css" th:href="@{/web/layui/css/layui.css}" />
+    <link rel="stylesheet" href="../../../static/web/kitadmin/css/ztree/metro/ztree.css" media="all" th:href="@{/web/kitadmin/css/ztree/metro/ztree.css}"/>
+    <link rel="stylesheet" href="../../../static/web/kitadmin/css/treeselect.css" media="all" th:href="@{/web/kitadmin/css/treeselect.css}"/>
+
+    <script src="../../../static/web/layui/layui.js" th:src="@{/web/layui/layui.js}"></script>
+    <script src="../../../static/web/jquery-3.3.1/jquery-3.3.1.js" th:src="@{/web/jquery-3.3.1/jquery-3.3.1.js}"></script>
+    <script src="../../../static/web/kitadmin/js/common.js" th:src="@{/web/kitadmin/js/common.js}"></script>
+
+</head>
+
+<body>
+<form class="layui-form layui-form-pane" style="margin-left: 20px;">
+    <input th:value="${role.id}" type="hidden" name="id">
+    <div class="layui-form-item">
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+            <legend style="font-size:20px;font-weight: bold">
+                <i class="layui-icon layui-icon-form" style="font-size:20px;"></i>角色信息
+            </legend>
+        </fieldset>
+    </div>
+    <div style="margin-left:10%">
+        <div class="layui-form-item">
+            <label for="roleName" class="layui-form-label">
+                <span style="color: red">*</span>角色
+            </label>
+            <div class="layui-input-inline">
+                <input type="text"  id="roleName" name="roleName"  th:value="${role.roleName}" autocomplete="off" class="layui-input" disabled>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label for="remark" class="layui-form-label">
+                    <span style="color: red">*</span>角色名称
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="remark" name="remark" th:value="${role.remark}" lay-verify="required|remark" lay-verType="tips"  autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+            <legend style="font-size:16px;font-weight: bold">
+                <i class="layui-icon layui-icon-auz" style="font-size:16px;"></i>权限
+            </legend>
+        </fieldset>
+    </div>
+    <div style="margin-left:10%">
+        <div class="layui-form-item">
+
+            <label for="menuIds" class="layui-form-label">
+                <span style="color: red">*</span>权限选择
+            </label>
+            <div class="layui-input-block layui-input-treeselect" style="width: 70%">
+                <input type="text" name="menuIds" id="menuIds" th:value="${menuIds}" lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+
+    <div style="width: 100%;height: 55px;background-color: white;border-top:1px solid #e6e6e6;position: fixed;bottom: 1px;margin-left:-20px;">
+        <div class="layui-form-item" style=" float: right;margin-right: 30px;margin-top: 8px">
+            <button  class="layui-btn " lay-filter="add" lay-submit style=" height:38px;line-hight:38px;">
+                <i class="layui-icon layui-icon-ok-circle" style="vertical-align: middle"></i> 保存
+            </button>
+            <button  class="layui-btn layui-btn-primary" id="close" style=" height:38px;line-hight:38px;">
+                <i class="layui-icon layui-icon-close-fill" style="vertical-align: middle"></i> 取消
+            </button>
+        </div>
+    </div>
+</form>
+
+<div class="layui-hide">
+    <ul id="roleTree" class="ztree"></ul>
+</div>
+
+<script  type="text/javascript" th:inline="javascript">
+
+
+    $(function(){
+
+
+        layui.config({
+            base: '/web/kitadmin/js/'//自定义组件的目录--相对路径
+        }).use([
+            'form', 'treeselect'
+        ], function(){
+            var form = layui.form;
+            var treeselect = layui.treeselect;
+            //通过调用render方法进行渲染 [render支持链式调用]
+            treeselect.render({ //渲染第一个
+                elem:'#menuIds', //这个设置必要为id属性且必须加上#号
+                data:[[${menuList}]]
+            });
+
+            //绑定关闭按钮
+            $('#close').on('click', function(){
+                closeWindow(window.name);
+            });
+
+            //监听提交
+            form.on('submit(add)', function(data){
+                $.ajax({
+                    url: '/webs/role/doUpdateRole',
+                    type:'post',
+                    data: data.field,
+                    traditional: true,
+                    success:function(data){
+                        if(data.code == 'SUCCESS'){
+                            window.parent.roleListTable.reload();
+                            closeWindow(window.name);
+                            window.top.layer.msg("更新成功！",{icon:6,offset: 'rb',area:['200px','80px'],anim:2});
+                        }else{
+                            window.top.layer.msg("更新失败",{icon: 5});
+                        }
+                    },error:function(e){
+                        window.top.layer.alert("发生错误！", {icon: 6},function () {
+                            closeWindow(window.name);
+                        });
+                    }
+                });
+                return false;
+            });
+
+            form.render();
+        });
+    });
+
+
+
+</script>
+</body>
+
+</html>

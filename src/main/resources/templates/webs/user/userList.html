@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>用户管理</title>
+    <link rel="stylesheet" href="../../../static/web/layui/css/layui.css" th:href="@{/web/layui/css/layui.css}" />
+
+
+    <script src="../../../static/web/layui/layui.js" th:src="@{/web/layui/layui.js}"></script>
+    <script src="../../../static/web/jquery-3.3.1/jquery-3.3.1.js" th:src="@{/web/jquery-3.3.1/jquery-3.3.1.js}"></script>
+    <script src="../../../static/web/kitadmin/js/common.js" th:src="@{/web/kitadmin/js/common.js}"></script>
+</head>
+
+<body>
+
+<div class="layui-row" style="margin-top: 10px">
+    <div class="layui-col-md3" style="width: 260px;margin-left: 10px">
+        <div class="layui-inline">
+            <input class="layui-input" name="searchText" id="searchText" autocomplete="off" placeholder="输入用户名">
+        </div>
+        <button class="layui-btn select" data-type="select">
+            <i class="layui-icon layui-icon-search"></i>
+        </button>
+
+    </div>
+    <div class="layui-col-md4">
+        <div class="layui-btn-group action">
+            <button class="layui-btn" data-type="add" shiro:hasPermission="user:add">
+                <i class="layui-icon layui-icon-add-1"></i>新增
+            </button>
+            <button class="layui-btn" data-type="active" shiro:hasPermission="user:active">
+                <i class="layui-icon layui-icon-ok"></i>激活
+            </button>
+            <button class="layui-btn layui-btn-danger" data-type="unactive" shiro:hasPermission="user:unactive">
+                <i class="layui-icon layui-icon-close"></i>禁用
+            </button>
+            <button class="layui-btn layui-btn-danger" data-type="delete" shiro:hasPermission="user:delete">
+                <i class="layui-icon layui-icon-delete"></i>删除
+            </button>
+
+        </div>
+    </div>
+
+</div>
+<table id="userList" class="layui-hide" lay-filter="user"></table>
+<div id="page"></div>
+<!-- 表格操作-->
+<script type="text/html" id="toolBar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail" shiro:hasPermission="user:show"><i class="layui-icon layui-icon-search"></i>查看</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit" shiro:hasPermission="user:update"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete" shiro:hasPermission="user:delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="changePwd" shiro:hasPermission="user:changePassword"><i class="layui-icon layui-icon-password"></i>修改密码</a>
+</script>
+
+
+<script type="text/html" id="userNameTpl">
+    <span style="color: #009688;font-size: 20px"><i class="layui-icon layui-icon-username" style="font-size: 20px"></i>  {{d.username}}</span>
+</script>
+
+<script type="text/html" id="delFlagTpl">
+  <input type="checkbox" name="delFlag" lay-skin="switch" lay-text="激活|禁用" lay-filter="delFlag" value = {{d.delFlag}} {{ d.delFlag == '1' ? 'checked' : '' }}>
+</script>
+
+<script type="text/html" id="rolesTpl">
+
+    {{# if(d.roles){
+        layui.each(d.roles.split(","), function(index, item){ }}
+        <span class="layui-badge layui-bg-orange">{{item}}</span>
+    {{#  });
+        } }}
+</script>
+
+<script  type="text/javascript" th:inline="javascript">
+    var userListTable;
+
+    $(function(){
+        layui.use([
+            'table','form'
+        ], function () {
+            var table = layui.table;
+            var $ = layui.$;
+            var form = layui.form;
+
+            //方法级渲染
+            userListTable = table.render({
+                id: 'userList',
+                elem: '#userList',
+                url: '/webs/user/getUserByPage',
+                loading: true,
+                even: true,
+                page: true,
+                height: 'full-70',
+                cols: [
+                    [
+                        {type: 'numbers', title: 'No.', fixed: true, width: '3%'}
+                        , {type: 'checkbox', fixed: true, width: '3%'}
+                        , {field: 'id', title: 'id'}
+                        , {field: 'username', title: '用户名', width: '10%', align: 'left', sort: true, templet: '#userNameTpl'}
+                        , {field: 'realName', title: '真实姓名', width: '10%', align: 'left'}
+                        , {field: 'age', title: '年龄', width: '5%', align: 'center'}
+                        , {field: 'email', title: '邮箱', width: '15%', align: 'left'}
+                        , {field: 'roles', title: '角色', width: '20%', align: 'left',templet:'#rolesTpl'}
+                        , {field: 'delFlag', title: '状态', width: '10%', align: 'center',templet:'#delFlagTpl'}
+                        , {field: 'right', title: '操作', width: '24%', align: 'center', toolbar: "#toolBar"}
+                    ]
+                ],
+                done: function(res, curr, count){
+                    $("[data-field='id']").css('display','none');
+                }
+            });
+
+            var active = {
+                select: function () {
+                    var searchText = $('#searchText').val();
+                    userListTable.reload( {
+                        where: {
+                            username: searchText,
+                            realName: searchText
+                        }
+                    });
+                },
+                add: function () {
+                    openWindow('user-user', '添加用户', '/webs/user/addUser','60%');
+                },
+                delete: function(){
+                    var checkStatus = table.checkStatus('userList');
+                    var data = checkStatus.data;
+                    if (data.length == 0) {
+                        layer.alert('请选择要删除的用户！', {icon: 5});
+                        return false;
+                    }else{
+                        deleteUser(data);
+                    }
+                },
+                active: function(){
+                    var checkStatus = table.checkStatus('userList');
+                    var data = checkStatus.data;
+                    if (data.length == 0) {
+                        layer.alert('请选择要激活的用户！', {icon: 5});
+                        return false;
+                    }else{
+                        activeUser(data, '1');
+                    }
+                },
+                unactive: function(){
+                    var checkStatus = table.checkStatus('userList');
+                    var data = checkStatus.data;
+                    if (data.length == 0) {
+                        layer.alert('请选择要禁用的用户！', {icon: 5});
+                        return false;
+                    }else{
+                        activeUser(data, '0');
+                    }
+                }
+            };
+
+            form.on('switch(delFlag)', function (data) {
+                var delFlag = data.othis;
+                var id = delFlag.closest('td').prevAll('td[data-field="id"]').find('div').text();
+                if(data.elem.checked){
+                   activeUser([{id: id}], '1');
+                }else{activeUser([{id: id}], '0');
+                }
+
+            });
+            //监听工具条
+            table.on('tool(user)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'delete') {
+                    deleteUser([data]);
+                } else if (obj.event === 'edit') {
+                    openWindow('user-update', "编辑用户", '/webs/user/updateUser?id=' + data.id,'60%');
+                }else if(obj.event === 'changePwd'){
+                    openWindow('user-changePwd', "修改密码", '/webs/user/changePassword?id=' + data.id,'60%');
+                }
+                else if(obj.event === 'detail'){
+                    openWindow("detail-user","用户信息",'/webs/user/detailUser?id=' + data.id,'60%')
+                }
+            });
+
+            $('.action .layui-btn, .select.layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+
+            form.render('checkbox');
+
+        });
+    });
+
+    function deleteUser(data){
+        layer.confirm('确定删除已选用户?', {icon: 3, title: '提示'}, function () {
+            var ids = [];
+            for(var i in data){
+                ids.push(data[i].id);
+            }
+
+            $.ajax({
+                url: '/webs/user/deleteUser',
+                type:'post',
+                data: {ids:ids},
+                traditional: true,
+                success:function(data){
+                    if(data.code == 'SUCCESS'){
+                        userListTable.reload();
+                        layer.msg("删除成功！", {icon:6,offset: 'rb',area:['200px','80px'],anim:2});
+                    }else{
+                        layer.msg("删除失败",  {icon: 5});
+                    }
+                }
+            });
+        });
+    }
+
+    function activeUser(data, active){
+        var activeMsg = '';
+        if(active == '1'){
+            activeMsg = '激活';
+        }else{
+            activeMsg = '禁用';
+        }
+        layer.confirm('确定'+activeMsg+'已选用户?', {icon: 3, title: '提示'}, function () {
+            var ids = [];
+            for(var i in data){
+                ids.push(data[i].id);
+            }
+            $.ajax({
+                url: '/webs/user/activeUser',
+                type:'post',
+                data: {ids:ids, active: active},
+                traditional: true,
+                success:function(data){
+                    if(data.code == 'SUCCESS'){
+                        userListTable.reload();
+                        layer.msg(activeMsg+"成功！", {icon:6,offset: 'rb',area:['200px','80px'],anim:2});
+
+                    }else{
+                        layer.msg(activeMsg+"失败",  {icon: 5});
+                    }
+                }
+            });
+        });
+    }
+
+
+
+</script>
+</body>
+
+</html>

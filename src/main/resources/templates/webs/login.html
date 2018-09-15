@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>登录</title>
+  <link rel="stylesheet" href="../../static/web/layui/css/layui.css" th:href="@{/web/layui/css/layui.css}">
+  <link rel="stylesheet" href="../../static/web/kitadmin/css/login.css" th:href="@{/web/kitadmin/css/login.css}">
+
+  <script src="../../static/web/layui/layui.js" th:src="@{/web/layui/layui.js}"></script>
+  <script src="../../static/web/jquery-3.3.1/jquery-3.3.1.js" th:src="@{/web/jquery-3.3.1/jquery-3.3.1.js}"></script>
+
+  <style>
+    .bb{
+      position: relative;
+      /*width: 200px;*/
+      /*height: 200px;*/
+      /*background: #666666;*/
+      /*border: 1px solid #5EF75E;*/
+    }
+    .bb:before,.bb:after{
+      content: " ";
+      display: block;
+      position: absolute;
+      width: 220px;
+      height: 60px;
+      top: -55px;
+      left: 30px;
+      border: 2px solid #00FF00;
+      z-index: 10;
+      box-sizing: border-box;
+      -webkit-animation: clipAni 4s infinite linear;
+      /*clip:rect(0px,220px,220px,217px);*/
+    }
+    .bb:before{
+      -webkit-animation-delay: -2s;
+    }
+    @keyframes  clipAni{
+      0%,100%{
+        clip:rect(0px,220px,60px,217px);
+      }
+      25%{
+        clip:rect(0px,220px,3px,0px);
+      }
+      50%{
+        clip:rect(0px,3px,60px,0px);
+      }
+      75%{
+        clip:rect(57px,220px,60px,0px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="kit-login">
+    <div class="kit-login-bg"></div>
+    <div class="kit-login-wapper">
+      <h2 class="kit-login-slogan" >
+          <div style="color: #009688;font-size: 40px;text-align: left">欢迎使用</div>
+          <div style="color: #009688;font-size: 50px;margin: 20px 0px 0px 40px">主场篮球</div><div class="bb"></div></h2>
+      <div class="kit-login-form">
+        <h4 class="kit-login-title">登录</h4>
+        <form class="layui-form">
+          <h4 id="error"></h4>
+          <div class="kit-login-row">
+            <div class="kit-login-col">
+              <i class="layui-icon layui-icon-username"></i>
+              <span class="kit-login-input">
+                <input type="text" name="username" id="username" lay-verify="required" lay-verType="tips"  autocomplete="off" placeholder="用户名" />
+              </span>
+            </div>
+            <div class="kit-login-col"></div>
+          </div>
+          <div class="kit-login-row">
+            <div class="kit-login-col">
+              <i class="layui-icon layui-icon-password"></i>
+              <span class="kit-login-input">
+                <input type="password" name="password" id="password" lay-verify="required" lay-verType="tips"  autocomplete="off" placeholder="密码" />
+              </span>
+            </div>
+            <div class="kit-login-col"></div>
+          </div>
+
+          <div class="kit-login-row">
+            <div class="kit-login-col">
+              <i class="layui-icon layui-icon-vercode"></i>
+              <span class="kit-login-input" style="width: 160px">
+                <input type="captcha" id="captcha" name="captcha"  lay-verify="required" lay-verType="tips"  autocomplete="off" placeholder="验证码" />
+              </span>
+              <div style="margin-left: 10px; display: inline-block">
+                <img src="/webs/captcha" id="captchaImg">
+              </div>
+
+            </div>
+          </div>
+
+          <div class="kit-login-row">
+            <div class="kit-login-col">
+              <input type="checkbox" name="rememberMe" id="rememberMe" title="记住帐号" lay-skin="primary">
+            </div>
+          </div>
+          <div class="kit-login-row">
+            <button class="layui-btn kit-login-btn" lay-submit="submit" lay-filter="login_hash">登录</button>
+          </div>
+          <div class="kit-login-row" style="margin-bottom:0;">
+            <a href="javascript:;" style="color: rgb(153, 153, 153); text-decoration: none; font-size: 13px;" id="forgot">忘记密码</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+      window.onload = function () {
+          if (window.parent.window != window) {
+              window.top.location = "/webs/login";
+          }
+      }
+
+
+       $('#captchaImg').click(function() {
+          $(this).attr('src','/webs/captcha?' + Math.floor(Math.random() * 100));
+      });
+
+      layui.use(['layer', 'form'], function() {
+          var form = layui.form,
+              layer = layui.layer,
+              $ = layui.jquery;
+
+          //监听提交
+          form.on('submit(login_hash)', function(data) {
+
+              $.ajax({
+                  url: '/webs/doLogin',
+                  type:'post',
+                  data: data.field,
+                  traditional: true,
+                  success:function(data){
+                      if(data.code != 'SUCCESS'){
+                          $('#captchaImg').click();
+                         layer.tips(data.message,'#' + data.data ,{tips: [1, 'red']});
+                      }else{
+                          location.href="/webs/index";
+                      }
+                  }
+              });
+              return false;
+
+          });
+      });
+
+  </script>
+</body>
+
+</html>
